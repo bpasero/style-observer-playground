@@ -60,6 +60,19 @@ function createStylesheet() {
     testStyleElement.id = 'test-style';
     testStyleElement.type = 'text/css';
     testStyleElement.media = 'screen';
+    testStyleElement.innerText = `
+        .test-element {
+            color: red;
+            font-size: 16px;
+            border: 1px solid #000;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .dynamic-class {
+            background-color: yellow;
+        }
+    `;
 
     // Add to document head
     window.document.head.appendChild(testStyleElement);
