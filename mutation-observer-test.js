@@ -76,9 +76,10 @@ function createStylesheet() {
     document.getElementById('create-btn').textContent = 'Stylesheet Created';
 
     // Now set up observers on the dynamically created stylesheet
-    setupMutationObservers();
-
-    updateObserverStatus();
+    setTimeout(() => {
+        setupMutationObservers();
+        updateObserverStatus();
+    }, 500)
 }
 
 function setupMutationObservers() {
