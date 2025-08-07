@@ -1,5 +1,5 @@
 // MutationObserver HTMLStyleSheet Test
-let observers = [];
+let styleElementObserver;
 let testStyleElement;
 let testStyleSheet;
 let ruleCounter = 0;
@@ -21,7 +21,6 @@ function updateObserverStatus() {
     const statusDiv = document.getElementById('observer-status');
     statusDiv.innerHTML = `
         <p><strong>Stylesheet Created:</strong> ${stylesheetCreated ? 'Yes' : 'No'}</p>
-        <p><strong>Active Observers:</strong> ${observers.length}</p>
         <p><strong>Style Element:</strong> ${testStyleElement ? 'Found' : 'Not found'}</p>
         <p><strong>StyleSheet:</strong> ${testStyleSheet ? 'Found' : 'Not found'}</p>
         <p><strong>StyleSheet Rules Count:</strong> ${testStyleSheet ? testStyleSheet.cssRules.length : 'N/A'}</p>
@@ -60,22 +59,7 @@ function createStylesheet() {
     testStyleElement = document.createElement('style');
     testStyleElement.id = 'test-style';
     testStyleElement.type = 'text/css';
-
-    // Set initial CSS content
-    const initialCSS = `
-        .test-element {
-            color: red;
-            font-size: 16px;
-            border: 1px solid #000;
-            padding: 10px;
-            margin: 10px 0;
-        }
-        
-        .dynamic-class {
-            background-color: yellow;
-        }`;
-
-    testStyleElement.innerText = initialCSS;
+    testStyleElement.innerText = '';
 
     // Add to document head
     document.head.appendChild(testStyleElement);
@@ -84,8 +68,6 @@ function createStylesheet() {
     testStyleSheet = testStyleElement.sheet;
 
     stylesheetCreated = true;
-    log('✓ Dynamic stylesheet created and added to document');
-    log(`Initial CSS:\n${initialCSS}`);
 
     // Update UI
     document.getElementById('stylesheet-status').innerHTML = '<strong style="color: green;">✓ Stylesheet created successfully!</strong>';
@@ -105,10 +87,9 @@ function setupMutationObservers() {
         return;
     }
 
-    log('Setting up MutationObservers...');
+    log('Setting up MutationObserver...');
 
-    // Observer 1: Monitor the style element itself
-    const styleElementObserver = new MutationObserver((mutations) => {
+    styleElementObserver = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             log(`Style Element Observer - Type: ${mutation.type}, Target: ${mutation.target.tagName}`);
             if (mutation.type === 'childList') {
@@ -124,48 +105,7 @@ function setupMutationObservers() {
         childList: true
     });
 
-    observers.push(styleElementObserver);
     log('✓ Style element observer set up');
-
-    // Observer 2: Try to monitor the stylesheet object directly (this is the main test)
-    try {
-        const stylesheetObserver = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                log(`StyleSheet Observer - Type: ${mutation.type}, Target: ${mutation.target.constructor.name}`);
-                if (mutation.type === 'childList') {
-                    log(`  Added nodes: ${mutation.addedNodes.length}, Removed nodes: ${mutation.removedNodes.length}`);
-                }
-            });
-        });
-
-        // This is the problematic line - trying to observe a StyleSheet object
-        stylesheetObserver.observe(testStyleSheet, {
-            childList: true
-        });
-
-        observers.push(stylesheetObserver);
-        log('✓ StyleSheet observer set up (THIS IS THE MAIN TEST)');
-    } catch (error) {
-        log(`✗ Failed to set up StyleSheet observer: ${error.message}`);
-    }
-
-    // Observer 3: Monitor the document for any style-related changes
-    const documentObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.target === testStyleElement ||
-                (mutation.addedNodes && Array.from(mutation.addedNodes).includes(testStyleElement)) ||
-                (mutation.removedNodes && Array.from(mutation.removedNodes).includes(testStyleElement))) {
-                log(`Document Observer - Detected change related to test style element`);
-            }
-        });
-    });
-
-    documentObserver.observe(document.head, {
-        childList: true
-    });
-
-    observers.push(documentObserver);
-    log('✓ Document observer set up');
 
     updateObserverStatus();
 }
@@ -177,12 +117,10 @@ function testAddCSSRule() {
         return;
     }
 
-    log('\n--- Testing: Add CSS Rule via innerText ---');
     try {
         const newRule = `.dynamic-rule-${++ruleCounter} { color: blue; font-weight: bold; }`;
         const currentCSS = testStyleElement.innerText;
         testStyleElement.innerText = currentCSS + '\n' + newRule;
-        log(`Added rule via innerText: ${newRule}`);
         updateObserverStatus();
     } catch (error) {
         log(`Error adding CSS rule: ${error.message}`);
@@ -195,7 +133,6 @@ function testRemoveCSSRule() {
         return;
     }
 
-    log('\n--- Testing: Remove CSS Rule via innerText ---');
     try {
         const currentCSS = testStyleElement.innerText;
         const lines = currentCSS.split('\n').filter(line => line.trim());
@@ -207,7 +144,6 @@ function testRemoveCSSRule() {
             const removedRule = lines[dynamicRuleIndex];
             lines.splice(dynamicRuleIndex, 1);
             testStyleElement.innerText = lines.join('\n');
-            log(`Removed rule via innerText: ${removedRule}`);
             updateObserverStatus();
         } else {
             log('No dynamic rules to remove');
@@ -333,21 +269,11 @@ function testDirectTextModification() {
 
 // Initialize when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    log('Page loaded, ready to create dynamic stylesheet...');
     displayBrowserInfo();
     updateObserverStatus();
-
-    log('\n--- Instructions ---');
-    log('1. Click "Create Test Stylesheet" to dynamically add a stylesheet');
-    log('2. MutationObservers will be set up on the dynamic stylesheet');
-    log('3. Then use the test buttons to modify the stylesheet');
-    log('4. Watch this log to see which MutationObserver events fire');
-    log('5. In Firefox, the StyleSheet observer should NOT fire for CSS rule changes');
-    log('6. Test focuses on dynamically created stylesheets vs pre-existing ones');
-    log('\nReady! Click the button above to start...');
 });
 
 // Cleanup observers when page unloads
 window.addEventListener('beforeunload', () => {
-    observers.forEach(observer => observer.disconnect());
+    styleElementObserver.disconnect();
 });
