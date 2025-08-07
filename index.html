@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MutationObserver HTMLStyleSheet Bug Report</title>
+    <style id="test-style">
+        .test-element {
+            color: red;
+            font-size: 16px;
+        }
+        
+        .dynamic-class {
+            background-color: yellow;
+        }
+    </style>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        
+        .log-area {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+        
+        .test-element {
+            padding: 10px;
+            border: 1px solid #000;
+            margin: 10px 0;
+        }
+        
+        .browser-info {
+            background-color: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MutationObserver HTMLStyleSheet Bug Report</h1>
+        
+        <div class="browser-info">
+            <h3>Browser Information:</h3>
+            <div id="browser-info"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test Description</h2>
+            <p>This test attempts to use MutationObserver to monitor changes to a HTMLStyleSheet's content using <code>{ childList: true }</code> options.</p>
+            <p><strong>Expected behavior:</strong> MutationObserver should detect when CSS rules are added, removed, or modified in the stylesheet.</p>
+            <p><strong>Observed behavior in Firefox:</strong> MutationObserver does not fire when stylesheet content changes.</p>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test Element</h2>
+            <div class="test-element" id="test-element">
+                This element's styling will be modified by the tests below.
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test Controls</h2>
+            <button onclick="testAddCSSRule()">Add CSS Rule</button>
+            <button onclick="testRemoveCSSRule()">Remove CSS Rule</button>
+            <button onclick="testModifyExistingRule()">Modify Existing Rule</button>
+            <button onclick="testInsertRule()">Insert Rule via insertRule()</button>
+            <button onclick="testDeleteRule()">Delete Rule via deleteRule()</button>
+            <button onclick="testDirectTextModification()">Modify Style Element Text</button>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>Observer Status</h2>
+            <div id="observer-status"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Event Log</h2>
+            <div class="log-area" id="log-area"></div>
+        </div>
+    </div>
+
+    <script src="mutation-observer-test.js"></script>
+</body>
+</html>

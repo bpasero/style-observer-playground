@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal MutationObserver StyleSheet Test</title>
+    <style id="test-style">
+        .test { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Minimal MutationObserver StyleSheet Test</h1>
+    <p>Open DevTools Console to see results</p>
+    <button onclick="addRule()">Add CSS Rule</button>
+    <button onclick="removeRule()">Remove CSS Rule</button>
+
+    <script>
+        // Get the stylesheet
+        const styleElement = document.getElementById('test-style');
+        const stylesheet = styleElement.sheet;
+        
+        console.log('Browser:', navigator.userAgent);
+        console.log('Initial rules count:', stylesheet.cssRules.length);
+        
+        // Set up MutationObserver on the stylesheet
+        const observer = new MutationObserver((mutations) => {
+            console.log('🔥 MutationObserver fired!', mutations);
+            mutations.forEach(mutation => {
+                console.log('  Mutation type:', mutation.type);
+                console.log('  Added nodes:', mutation.addedNodes.length);
+                console.log('  Removed nodes:', mutation.removedNodes.length);
+            });
+        });
+        
+        try {
+            // This is the problematic line in Firefox
+            observer.observe(stylesheet, { childList: true });
+            console.log('✅ MutationObserver successfully observing stylesheet');
+        } catch (error) {
+            console.error('❌ Failed to observe stylesheet:', error);
+        }
+        
+        let ruleCounter = 0;
+        
+        function addRule() {
+            const rule = `.dynamic-${++ruleCounter} { color: blue; }`;
+            stylesheet.insertRule(rule, stylesheet.cssRules.length);
+            console.log('Added rule:', rule);
+            console.log('New rules count:', stylesheet.cssRules.length);
+        }
+        
+        function removeRule() {
+            if (stylesheet.cssRules.length > 1) {
+                const removedRule = stylesheet.cssRules[stylesheet.cssRules.length - 1].cssText;
+                stylesheet.deleteRule(stylesheet.cssRules.length - 1);
+                console.log('Removed rule:', removedRule);
+                console.log('New rules count:', stylesheet.cssRules.length);
+            } else {
+                console.log('No rules to remove');
+            }
+        }
+        
+        console.log('Ready! Click buttons to test...');
+    </script>
+</body>
+</html>
