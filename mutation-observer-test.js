@@ -76,7 +76,7 @@ function setupMutationObservers() {
                 log(`  Added nodes: ${mutation.addedNodes.length}, Removed nodes: ${mutation.removedNodes.length}`);
             }
             if (mutation.type === 'characterData') {
-                log(`  Character data changed: "${mutation.target.textContent}"`);
+                log(`  Character data changed: "${mutation.target.innerText}"`);
             }
         });
     });
@@ -133,12 +133,12 @@ function setupMutationObservers() {
 
 // Test functions
 function testAddCSSRule() {
-    log('\n--- Testing: Add CSS Rule via textContent ---');
+    log('\n--- Testing: Add CSS Rule via innerText ---');
     try {
         const newRule = `.dynamic-rule-${++ruleCounter} { color: blue; font-weight: bold; }`;
-        const currentCSS = testStyleElement.textContent;
-        testStyleElement.textContent = currentCSS + '\n' + newRule;
-        log(`Added rule via textContent: ${newRule}`);
+        const currentCSS = testStyleElement.innerText;
+        testStyleElement.innerText = currentCSS + '\n' + newRule;
+        log(`Added rule via innerText: ${newRule}`);
         updateObserverStatus();
     } catch (error) {
         log(`Error adding CSS rule: ${error.message}`);
@@ -146,9 +146,9 @@ function testAddCSSRule() {
 }
 
 function testRemoveCSSRule() {
-    log('\n--- Testing: Remove CSS Rule via textContent ---');
+    log('\n--- Testing: Remove CSS Rule via innerText ---');
     try {
-        const currentCSS = testStyleElement.textContent;
+        const currentCSS = testStyleElement.innerText;
         const lines = currentCSS.split('\n').filter(line => line.trim());
 
         // Find and remove the last dynamic rule
@@ -157,8 +157,8 @@ function testRemoveCSSRule() {
         if (dynamicRuleIndex !== -1) {
             const removedRule = lines[dynamicRuleIndex];
             lines.splice(dynamicRuleIndex, 1);
-            testStyleElement.textContent = lines.join('\n');
-            log(`Removed rule via textContent: ${removedRule}`);
+            testStyleElement.innerText = lines.join('\n');
+            log(`Removed rule via innerText: ${removedRule}`);
             updateObserverStatus();
         } else {
             log('No dynamic rules to remove');
@@ -169,10 +169,10 @@ function testRemoveCSSRule() {
 }
 
 function testModifyExistingRule() {
-    log('\n--- Testing: Modify Existing Rule via textContent ---');
+    log('\n--- Testing: Modify Existing Rule via innerText ---');
     try {
         const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-        let currentCSS = testStyleElement.textContent;
+        let currentCSS = testStyleElement.innerText;
 
         // Replace the color in .test-element rule
         const updatedCSS = currentCSS.replace(
@@ -181,8 +181,8 @@ function testModifyExistingRule() {
         );
 
         if (updatedCSS !== currentCSS) {
-            testStyleElement.textContent = updatedCSS;
-            log(`Modified .test-element color to: ${randomColor} via textContent`);
+            testStyleElement.innerText = updatedCSS;
+            log(`Modified .test-element color to: ${randomColor} via innerText`);
             updateObserverStatus();
         } else {
             log('Could not find .test-element rule to modify');
@@ -193,15 +193,15 @@ function testModifyExistingRule() {
 }
 
 function testInsertRule() {
-    log('\n--- Testing: Insert Rule via textContent ---');
+    log('\n--- Testing: Insert Rule via innerText ---');
     try {
         const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
         const newRule = `.inserted-rule-${++ruleCounter} { background-color: ${randomColor}; padding: 5px; }`;
-        const currentCSS = testStyleElement.textContent;
+        const currentCSS = testStyleElement.innerText;
 
         // Insert at the beginning
-        testStyleElement.textContent = newRule + '\n' + currentCSS;
-        log(`Inserted rule at beginning via textContent: ${newRule}`);
+        testStyleElement.innerText = newRule + '\n' + currentCSS;
+        log(`Inserted rule at beginning via innerText: ${newRule}`);
         updateObserverStatus();
     } catch (error) {
         log(`Error inserting CSS rule: ${error.message}`);
@@ -209,9 +209,9 @@ function testInsertRule() {
 }
 
 function testDeleteRule() {
-    log('\n--- Testing: Delete Rule via textContent ---');
+    log('\n--- Testing: Delete Rule via innerText ---');
     try {
-        const currentCSS = testStyleElement.textContent;
+        const currentCSS = testStyleElement.innerText;
         const lines = currentCSS.split('\n').filter(line => line.trim());
 
         // Remove first rule (that's not .test-element or .dynamic-class)
@@ -224,8 +224,8 @@ function testDeleteRule() {
         if (ruleToDeleteIndex !== -1) {
             const ruleToDelete = lines[ruleToDeleteIndex];
             lines.splice(ruleToDeleteIndex, 1);
-            testStyleElement.textContent = lines.join('\n');
-            log(`Deleted rule via textContent: ${ruleToDelete}`);
+            testStyleElement.innerText = lines.join('\n');
+            log(`Deleted rule via innerText: ${ruleToDelete}`);
             updateObserverStatus();
         } else {
             log('No rules available to delete');
@@ -254,7 +254,7 @@ function testDirectTextModification() {
             margin: 5px;
         }`;
 
-        testStyleElement.textContent = newCSS;
+        testStyleElement.innerText = newCSS;
         log('Modified style element text content directly');
         updateObserverStatus();
     } catch (error) {
