@@ -4,16 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MutationObserver HTMLStyleSheet Bug Report</title>
-    <style id="test-style">
-        .test-element {
-            color: red;
-            font-size: 16px;
-        }
-        
-        .dynamic-class {
-            background-color: yellow;
-        }
-    </style>
+    <!-- Test style will be added dynamically -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -81,14 +72,22 @@
         </div>
         
         <div class="test-section">
+            <h2>Step 1: Create Stylesheet</h2>
+            <p>First, you need to dynamically create a stylesheet to test with.</p>
+            <button onclick="createStylesheet()" id="create-btn">Create Test Stylesheet</button>
+            <div id="stylesheet-status">No stylesheet created yet</div>
+        </div>
+        
+        <div class="test-section">
             <h2>Test Element</h2>
             <div class="test-element" id="test-element">
                 This element's styling will be modified by the tests below.
             </div>
         </div>
-        
-        <div class="test-section">
-            <h2>Test Controls</h2>
+
+        <div class="test-section" id="test-controls" style="display: none;">
+            <h2>Step 2: Test Controls</h2>
+            <p>Now you can test MutationObserver behavior on the dynamically created stylesheet:</p>
             <button onclick="testAddCSSRule()">Add CSS Rule</button>
             <button onclick="testRemoveCSSRule()">Remove CSS Rule</button>
             <button onclick="testModifyExistingRule()">Modify Existing Rule</button>

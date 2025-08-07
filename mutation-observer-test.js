@@ -3,6 +3,7 @@ let observers = [];
 let testStyleElement;
 let testStyleSheet;
 let ruleCounter = 0;
+let stylesheetCreated = false;
 
 function log(message) {
     const logArea = document.getElementById('log-area');
@@ -19,6 +20,7 @@ function clearLog() {
 function updateObserverStatus() {
     const statusDiv = document.getElementById('observer-status');
     statusDiv.innerHTML = `
+        <p><strong>Stylesheet Created:</strong> ${stylesheetCreated ? 'Yes' : 'No'}</p>
         <p><strong>Active Observers:</strong> ${observers.length}</p>
         <p><strong>Style Element:</strong> ${testStyleElement ? 'Found' : 'Not found'}</p>
         <p><strong>StyleSheet:</strong> ${testStyleSheet ? 'Found' : 'Not found'}</p>
@@ -51,18 +53,55 @@ function getBrowserVersion() {
     return match ? match[2] : 'Unknown';
 }
 
-function setupMutationObservers() {
-    testStyleElement = document.getElementById('test-style');
+function createStylesheet() {
+    log('\n--- Creating Dynamic Stylesheet ---');
 
-    if (!testStyleElement) {
-        log('ERROR: Could not find test style element');
-        return;
-    }
+    // Create a new style element
+    testStyleElement = document.createElement('style');
+    testStyleElement.id = 'test-style';
+    testStyleElement.type = 'text/css';
 
+    // Set initial CSS content
+    const initialCSS = `
+        .test-element {
+            color: red;
+            font-size: 16px;
+            border: 1px solid #000;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .dynamic-class {
+            background-color: yellow;
+        }`;
+
+    testStyleElement.innerText = initialCSS;
+
+    // Add to document head
+    document.head.appendChild(testStyleElement);
+
+    // Get the stylesheet reference
     testStyleSheet = testStyleElement.sheet;
 
-    if (!testStyleSheet) {
-        log('ERROR: Could not access stylesheet from style element');
+    stylesheetCreated = true;
+    log('✓ Dynamic stylesheet created and added to document');
+    log(`Initial CSS:\n${initialCSS}`);
+
+    // Update UI
+    document.getElementById('stylesheet-status').innerHTML = '<strong style="color: green;">✓ Stylesheet created successfully!</strong>';
+    document.getElementById('test-controls').style.display = 'block';
+    document.getElementById('create-btn').disabled = true;
+    document.getElementById('create-btn').textContent = 'Stylesheet Created';
+
+    // Now set up observers on the dynamically created stylesheet
+    setupMutationObservers();
+
+    updateObserverStatus();
+}
+
+function setupMutationObservers() {
+    if (!testStyleElement) {
+        log('ERROR: No stylesheet created yet');
         return;
     }
 
@@ -133,6 +172,11 @@ function setupMutationObservers() {
 
 // Test functions
 function testAddCSSRule() {
+    if (!stylesheetCreated) {
+        log('ERROR: Create a stylesheet first!');
+        return;
+    }
+
     log('\n--- Testing: Add CSS Rule via innerText ---');
     try {
         const newRule = `.dynamic-rule-${++ruleCounter} { color: blue; font-weight: bold; }`;
@@ -146,6 +190,11 @@ function testAddCSSRule() {
 }
 
 function testRemoveCSSRule() {
+    if (!stylesheetCreated) {
+        log('ERROR: Create a stylesheet first!');
+        return;
+    }
+
     log('\n--- Testing: Remove CSS Rule via innerText ---');
     try {
         const currentCSS = testStyleElement.innerText;
@@ -169,6 +218,11 @@ function testRemoveCSSRule() {
 }
 
 function testModifyExistingRule() {
+    if (!stylesheetCreated) {
+        log('ERROR: Create a stylesheet first!');
+        return;
+    }
+
     log('\n--- Testing: Modify Existing Rule via innerText ---');
     try {
         const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
@@ -193,6 +247,11 @@ function testModifyExistingRule() {
 }
 
 function testInsertRule() {
+    if (!stylesheetCreated) {
+        log('ERROR: Create a stylesheet first!');
+        return;
+    }
+
     log('\n--- Testing: Insert Rule via innerText ---');
     try {
         const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
@@ -209,6 +268,11 @@ function testInsertRule() {
 }
 
 function testDeleteRule() {
+    if (!stylesheetCreated) {
+        log('ERROR: Create a stylesheet first!');
+        return;
+    }
+
     log('\n--- Testing: Delete Rule via innerText ---');
     try {
         const currentCSS = testStyleElement.innerText;
@@ -236,6 +300,11 @@ function testDeleteRule() {
 }
 
 function testDirectTextModification() {
+    if (!stylesheetCreated) {
+        log('ERROR: Create a stylesheet first!');
+        return;
+    }
+
     log('\n--- Testing: Direct Style Element Text Modification ---');
     try {
         const newCSS = `
@@ -264,24 +333,18 @@ function testDirectTextModification() {
 
 // Initialize when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    log('Page loaded, initializing test...');
+    log('Page loaded, ready to create dynamic stylesheet...');
     displayBrowserInfo();
-    setupMutationObservers();
-
-    log('\n--- Initial State ---');
-    log(`StyleSheet has ${testStyleSheet ? testStyleSheet.cssRules.length : 0} rules`);
-    if (testStyleSheet) {
-        for (let i = 0; i < testStyleSheet.cssRules.length; i++) {
-            log(`Rule ${i}: ${testStyleSheet.cssRules[i].cssText}`);
-        }
-    }
+    updateObserverStatus();
 
     log('\n--- Instructions ---');
-    log('1. Click the test buttons to modify the stylesheet');
-    log('2. Watch this log to see which MutationObserver events fire');
-    log('3. In Firefox, the StyleSheet observer should NOT fire for CSS rule changes');
-    log('4. In other browsers, behavior may differ');
-    log('\nReady for testing!');
+    log('1. Click "Create Test Stylesheet" to dynamically add a stylesheet');
+    log('2. MutationObservers will be set up on the dynamic stylesheet');
+    log('3. Then use the test buttons to modify the stylesheet');
+    log('4. Watch this log to see which MutationObserver events fire');
+    log('5. In Firefox, the StyleSheet observer should NOT fire for CSS rule changes');
+    log('6. Test focuses on dynamically created stylesheets vs pre-existing ones');
+    log('\nReady! Click the button above to start...');
 });
 
 // Cleanup observers when page unloads
