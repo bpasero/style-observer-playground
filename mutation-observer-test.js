@@ -59,10 +59,10 @@ function createStylesheet() {
     testStyleElement = document.createElement('style');
     testStyleElement.id = 'test-style';
     testStyleElement.type = 'text/css';
-    testStyleElement.innerText = '';
+    testStyleElement.media = 'screen';
 
     // Add to document head
-    document.head.appendChild(testStyleElement);
+    window.document.head.appendChild(testStyleElement);
 
     // Get the stylesheet reference
     testStyleSheet = testStyleElement.sheet;
